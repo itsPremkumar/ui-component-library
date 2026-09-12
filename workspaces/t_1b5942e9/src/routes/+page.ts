@@ -1,8 +1,7 @@
 import { redirect } from '@sveltejs/kit';
-import type { PageLoad } from './$types';
 
 export const prerender = false;
 
-export function load(): ReturnType<PageLoad> {
+export function load() {
   throw redirect(307, '/dashboard');
 }

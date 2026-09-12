@@ -15,22 +15,23 @@
     }
   });
 
-  $: hasData = !!$activeReport;
+  $: report = $activeReport;
+  $: hasData = !!report;
 </script>
 
-{#if hasData}
+{#if hasData && report}
   <div class="space-y-6" transition:fade={{ duration: 300 }}>
     <!-- Summary Cards -->
-    <SummaryCards report={$activeReport} />
+    <SummaryCards {report} />
 
     <!-- Charts Row -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <SuiteBreakdown suites={$activeReport.suites} />
-      <DurationHistogram tests={$activeReport.suites.flatMap(s => s.tests)} />
+      <SuiteBreakdown suites={report.suites} />
+      <DurationHistogram tests={report.suites.flatMap(s => s.tests)} />
     </div>
 
     <!-- Failures List -->
-    <FailuresList tests={$activeReport.suites.flatMap(s => s.tests)} />
+    <FailuresList tests={report.suites.flatMap(s => s.tests)} />
   </div>
 {:else}
   <EmptyState

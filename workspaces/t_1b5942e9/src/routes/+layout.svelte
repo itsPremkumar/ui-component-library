@@ -80,7 +80,11 @@
   {#if sidebarOpen}
     <div
       class="fixed inset-0 bg-black/50 z-40 lg:hidden"
+      role="button"
+      tabindex="0"
+      aria-label="Close sidebar"
       on:click={() => sidebarOpen.set(false)}
+      on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') sidebarOpen.set(false); }}
     />
   {/if}
 

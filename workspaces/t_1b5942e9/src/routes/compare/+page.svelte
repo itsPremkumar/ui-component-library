@@ -24,13 +24,14 @@
     <!-- Report Selectors -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div class="card">
-        <label class="text-sm font-medium text-gray-500">Report A (Baseline)</label>
+        <span class="text-sm font-medium text-gray-500">Report A (Baseline)</span>
         <p class="text-lg font-semibold text-gray-900 mt-1">{$activeReport.name}</p>
         <p class="text-sm text-gray-500">{$activeReport.summary.total} tests, {$activeReport.summary.passRate.toFixed(1)}% pass rate</p>
       </div>
       <div class="card">
-        <label class="text-sm font-medium text-gray-500">Report B (Comparison)</label>
+        <label for="comparison-report-select" class="text-sm font-medium text-gray-500">Report B (Comparison)</label>
         <select
+          id="comparison-report-select"
           class="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
           value={$comparisonReportId || ''}
           on:change={selectComparisonReport}

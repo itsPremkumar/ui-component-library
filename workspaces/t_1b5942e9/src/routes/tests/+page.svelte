@@ -34,10 +34,10 @@
 
   function toggleStatus(status: string) {
     const current = $filters.statuses;
-    if (current.includes(status as TestStatus)) {
+    if (current.includes(status)) {
       filters.set({ ...$filters, statuses: current.filter((s) => s !== status) });
     } else {
-      filters.set({ ...$filters, statuses: [...current, status as TestStatus] });
+      filters.set({ ...$filters, statuses: [...current, status] });
     }
     currentPage = 1;
   }
