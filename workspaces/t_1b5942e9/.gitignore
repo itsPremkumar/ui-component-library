@@ -1,0 +1,28 @@
+# SvelteKit
+/node_modules
+/.svelte-kit
+/build
+/.vercel
+/.netlify
+/packages
+.env
+.env.*
+!.env.example
+
+# Testing
+/coverage
+/playwright-report
+/test-results
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+*.log
