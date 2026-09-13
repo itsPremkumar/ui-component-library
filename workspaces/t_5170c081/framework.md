@@ -161,9 +161,9 @@ The risk assessment follows a structured methodology:
 
 ### 4.3 Risk Scoring
 
-Risk scoring uses the standard Likelihood × Impact matrix (5×5 scale). See `risk-matrix.md` for the full template.
+Risk scoring uses the standard Likelihood x Impact matrix (5x5 scale). See `risk-matrix.md` for the full template.
 
-**Risk Score = Likelihood (1-5) × Impact (1-5)**
+**Risk Score = Likelihood (1-5) x Impact (1-5)**
 
 | Score | Level | Response |
 |---|---|---|

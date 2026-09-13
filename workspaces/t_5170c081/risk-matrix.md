@@ -182,7 +182,7 @@ Step 1: IDENTIFY
 
 Step 2: ANALYZE
   → Score each risk on likelihood (1-5) and impact (1-5)
-  → Calculate risk score (likelihood × impact)
+  → Calculate risk score (likelihood x impact)
   → Use historical incident data and domain expertise for scoring
 
 Step 3: EVALUATE
@@ -237,7 +237,7 @@ Risk Acceptance Record
 ======================
 Risk ID:           R-XXX
 Risk Description:  [description]
-Original Score:    [likelihood × impact = score]
+Original Score:    [likelihood x impact = score]
 Residual Score:    [after mitigation]
 Acceptance Authority: [role + name]
 Acceptance Date:   [YYYY-MM-DD]
