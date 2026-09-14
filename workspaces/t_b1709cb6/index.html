@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="DevPortal - Modern Developer Portal with Documentation, API Reference, and Guides">
+  <meta name="theme-color" content="#6366f1">
+  <title>DevPortal - Developer Portal</title>
+  <!-- Docsify core -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  <!-- Custom theme -->
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <!-- Prism for syntax highlighting -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+</head>
+<body>
+  <div id="app">
+    <div class="loading-screen">
+      <div class="loader"></div>
+      <p>Loading DevPortal...</p>
+    </div>
+  </div>
+
+  <script>
+    window.$docsify = {
+      name: 'DevPortal',
+      repo: 'itsPremkumar/developer-portal',
+      loadSidebar: true,
+      loadNavbar: true,
+      subMaxLevel: 3,
+      auto2top: true,
+      coverpage: true,
+      onlyCover: false,
+      search: {
+        maxAge: 86400000,
+        paths: 'auto',
+        placeholder: 'Type to search...',
+        noData: 'No results found.',
+        depth: 6,
+        hideOtherSidebarContent: true
+      },
+      tabs: {
+        persist: true,
+        sync: true,
+        theme: 'classic',
+        tabComments: true,
+        tabHeadings: true
+      },
+      copyCode: {
+        buttonText: 'Copy',
+        errorText: 'Error',
+        successText: 'Copied!'
+      },
+      flexibleAlerts: true,
+      plantuml: {
+        skin: 'default',
+        renderSvgAsObject: true
+      },
+      count: {
+        countable: true,
+        position: 'top',
+        margin: 10,
+        float: 'right',
+        fontsize: '0.9em',
+        color: 'rgb(90,90,90)',
+        language: 'english'
+      },
+      pagination: {
+        previousText: 'Previous',
+        nextText: 'Next',
+        crossChapter: true,
+        crossChapterText: true
+      },
+      vueComponents: {
+        'api-console': {
+          template: `
+            <div class="api-console">
+              <div class="console-header">
+                <h3><i class="fas fa-terminal"></i> Interactive API Console</h3>
+                <div class="version-selector">
+                  <label>API Version:</label>
+                  <select v-model="version" @change="updateEndpoints">
+                    <option value="v2">v2 (Latest)</option>
+                    <option value="v1">v1 (Legacy)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="endpoint-selector">
+                <label>Endpoint:</label>
+                <select v-model="selectedEndpoint" @change="selectEndpoint">
+                  <option v-for="ep in endpoints" :key="ep.path" :value="ep">
+                    {{ ep.method }} {{ ep.path }} - {{ ep.summary }}
+                  </option>
+                </select>
+              </div>
+              <div v-if="selectedEndpoint" class="endpoint-details">
+                <div class="method-badge" :class="selectedEndpoint.method.toLowerCase()">
+                  {{ selectedEndpoint.method }}
+                </div>
+                <code class="endpoint-path">{{ selectedEndpoint.path }}</code>
+                <p class="endpoint-desc">{{ selectedEndpoint.description }}</p>
+                <div v-if="selectedEndpoint.parameters && selectedEndpoint.parameters.length" class="params-section">
+                  <h4>Parameters</h4>
+                  <div v-for="param in selectedEndpoint.parameters" :key="param.name" class="param-row">
+                    <label>{{ param.name }} <span v-if="param.required" class="required">*</span></label>
+                    <input v-model="paramValues[param.name]" :placeholder="param.description" :type="param.type === 'number' ? 'number' : 'text'">
+                  </div>
+                </div>
+                <div v-if="selectedEndpoint.requestBody" class="body-section">
+                  <h4>Request Body</h4>
+                  <textarea v-model="requestBody" rows="6" placeholder="JSON request body..."></textarea>
+                </div>
+                <button class="execute-btn" @click="executeRequest" :disabled="loading">
+                  <i class="fas fa-play"></i> {{ loading ? 'Executing...' : 'Execute' }}
+                </button>
+                <div v-if="response" class="response-section">
+                  <h4>Response <span class="status-badge" :class="response.status < 400 ? 'success' : 'error'">{{ response.status }}</span></h4>
+                  <pre><code>{{ response.body }}</code></pre>
+                </div>
+              </div>
+            </div>
+          `,
+          data() {
+            return {
+              version: 'v2',
+              selectedEndpoint: null,
+              endpoints: [],
+              paramValues: {},
+              requestBody: '',
+              loading: false,
+              response: null
+            };
+          },
+          mounted() {
+            this.updateEndpoints();
+          },
+          methods: {
+            updateEndpoints() {
+              const eps = API_SPEC[this.version] || [];
+              this.endpoints = eps;
+              this.selectedEndpoint = eps[0] || null;
+              this.paramValues = {};
+              this.requestBody = '';
+              this.response = null;
+            },
+            selectEndpoint() {
+              this.paramValues = {};
+              this.requestBody = '';
+              this.response = null;
+            },
+            async executeRequest() {
+              this.loading = true;
+              this.response = null;
+              try {
+                let url = this.selectedEndpoint.path;
+                Object.keys(this.paramValues).forEach(key => {
+                  url = url.replace(`{${key}}`, this.paramValues[key]);
+                });
+                const options = {
+                  method: this.selectedEndpoint.method,
+                  headers: { 'Content-Type': 'application/json' }
+                };
+                if (this.requestBody && ['POST', 'PUT', 'PATCH'].includes(this.selectedEndpoint.method)) {
+                  options.body = this.requestBody;
+                }
+                const res = await fetch(url, options);
+                const body = await res.text();
+                this.response = { status: res.status, body };
+              } catch (e) {
+                this.response = { status: 0, body: 'Error: ' + e.message };
+              }
+              this.loading = false;
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Docsify plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/copy-code.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/external-script.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-tabs@1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-pagination@2.6.1/dist/docsify-pagination.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-copy-code@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-http.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-graphql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-docker.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-nginx.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markdown.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-jsx.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-tsx.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-c.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-rust.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-ruby.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-php.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-swift.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-kotlin.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-scala.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-shell-session.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup-templating.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-handlebars.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-ejs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-pug.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javadoclike.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.min.js"></script>
+  <script src="assets/js/api-spec.js"></script>
+  <script src="assets/js/custom.js"></script>
+</body>
+</html>
