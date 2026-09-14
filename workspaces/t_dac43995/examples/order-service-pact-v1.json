@@ -1,0 +1,87 @@
+{
+  "consumer": {"name": "order-service"},
+  "provider": {"name": "user-service"},
+  "interactions": [
+    {
+      "description": "get user by ID",
+      "providerState": "user with ID 123 exists",
+      "request": {
+        "method": "GET",
+        "path": "/api/users/123",
+        "headers": {"Accept": "application/json"}
+      },
+      "response": {
+        "status": 200,
+        "headers": {"Content-Type": "application/json"},
+        "body": {
+          "id": 123,
+          "name": "Alice Johnson",
+          "email": "alice@example.com",
+          "role": "customer",
+          "created_at": "2025-01-15T10:30:00Z"
+        }
+      }
+    },
+    {
+      "description": "create a new user",
+      "providerState": "user does not exist",
+      "request": {
+        "method": "POST",
+        "path": "/api/users",
+        "headers": {"Content-Type": "application/json"},
+        "body": {
+          "name": "Bob Smith",
+          "email": "bob@example.com",
+          "role": "customer"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {"Content-Type": "application/json"},
+        "body": {
+          "id": 124,
+          "name": "Bob Smith",
+          "email": "bob@example.com",
+          "role": "customer",
+          "created_at": "2025-06-01T14:00:00Z"
+        }
+      }
+    },
+    {
+      "description": "update user profile",
+      "providerState": "user with ID 123 exists",
+      "request": {
+        "method": "PATCH",
+        "path": "/api/users/123",
+        "headers": {"Content-Type": "application/json"},
+        "body": {"name": "Alice J."}
+      },
+      "response": {
+        "status": 200,
+        "headers": {"Content-Type": "application/json"},
+        "body": {
+          "id": 123,
+          "name": "Alice J.",
+          "email": "alice@example.com",
+          "role": "customer",
+          "created_at": "2025-01-15T10:30:00Z"
+        }
+      }
+    },
+    {
+      "description": "delete user",
+      "providerState": "user with ID 123 exists",
+      "request": {
+        "method": "DELETE",
+        "path": "/api/users/123"
+      },
+      "response": {
+        "status": 204
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {"version": "3.0.0"},
+    "pact-python": {"version": "1.0.0"}
+  }
+}
