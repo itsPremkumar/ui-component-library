@@ -1,0 +1,37 @@
+# Example custom rules file
+# Place your custom security, compliance, and cost rules here
+
+rules:
+  - id: CUSTOM001
+    type: property
+    title: S3 Bucket Must Have Logging Enabled
+    description: S3 buckets should have access logging enabled for audit purposes
+    severity: medium
+    resource_types:
+      - aws_s3_bucket
+    property_name: logging
+    required: true
+    remediation: "Add a logging block to the S3 bucket"
+    category: compliance
+
+  - id: CUSTOM002
+    type: tag
+    title: Required Data Classification Tag
+    description: All resources must have a DataClassification tag
+    severity: high
+    required_tags:
+      - DataClassification
+    remediation: "Add DataClassification tag (Public, Internal, Confidential, Restricted)"
+    category: compliance
+
+  - id: CUSTOM003
+    type: property
+    title: EC2 Instance Must Use Latest AMI
+    description: EC2 instances should use a recent AMI (within 90 days)
+    severity: low
+    resource_types:
+      - aws_instance
+    property_name: ami
+    required: true
+    remediation: "Update to a recent AMI"
+    category: security

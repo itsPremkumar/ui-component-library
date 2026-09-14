@@ -1,0 +1,58 @@
+# Example CloudFormation template with issues
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Example CloudFormation template with security issues
+
+Resources:
+  # CRITICAL: Public S3 bucket
+  PublicBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: my-public-bucket
+      AccessControl: PublicRead
+      Tags:
+        - Key: Name
+          Value: PublicBucket
+
+  # HIGH: Unencrypted EBS volume
+  DataVolume:
+    Type: AWS::EC2::Volume
+    Properties:
+      AvailabilityZone: us-east-1a
+      Size: 100
+      VolumeType: gp3
+      # Encrypted: true  # Missing!
+
+  # MEDIUM: Oversized EC2 instance
+  WebServer:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-12345678
+      InstanceType: m5.4xlarge
+      Tags:
+        - Key: Name
+          Value: WebServer
+        - Key: Environment
+          Value: production
+
+  # HIGH: Publicly accessible RDS
+  Database:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceClass: db.m5.xlarge
+      Engine: mysql
+      MasterUsername: admin
+      MasterUserPassword: changeme
+      AllocatedStorage: 100
+      PubliclyAccessible: true
+
+  # MEDIUM: Open security group
+  OpenSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Open to world
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
