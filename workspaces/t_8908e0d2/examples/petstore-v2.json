@@ -1,0 +1,253 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Pet Store API",
+    "version": "2.0.0",
+    "description": "A sample API for a pet store - version 2 with breaking changes"
+  },
+  "servers": [
+    {"url": "https://api.petstore.example.com/v2"}
+  ],
+  "tags": [
+    {"name": "pets", "description": "Operations about pets"},
+    {"name": "store", "description": "Operations about store inventory"},
+    {"name": "users", "description": "Operations about users"}
+  ],
+  "paths": {
+    "/pets": {
+      "get": {
+        "operationId": "listPets",
+        "summary": "List all pets with pagination",
+        "description": "Returns a paginated list of all pets in the store with cursor support",
+        "tags": ["pets"],
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Cursor for pagination",
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of results to return",
+            "schema": {"type": "integer", "default": 20}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A paginated list of pets with cursor",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/PetList"}
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createPet",
+        "summary": "Create a pet",
+        "description": "Add a new pet to the store inventory",
+        "tags": ["pets"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/PetInput"}
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pet created successfully",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Pet"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pets/{petId}": {
+      "get": {
+        "operationId": "getPetById",
+        "summary": "Get a pet by ID",
+        "description": "Returns detailed information about a specific pet",
+        "tags": ["pets"],
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the pet",
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pet found",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Pet"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "listUsers",
+        "summary": "List all users",
+        "description": "Returns a list of all registered users",
+        "tags": ["users"],
+        "responses": {
+          "200": {
+            "description": "A list of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/User"}
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createUser",
+        "summary": "Create a user",
+        "description": "Register a new user",
+        "tags": ["users"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/UserInput"}
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/User"}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pet": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "name": {
+            "type": "string",
+            "example": "Fluffy"
+          },
+          "tag": {
+            "type": "string",
+            "example": "dog"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["available", "pending", "sold", "adopted"],
+            "description": "Pet status in the store"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PetInput": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Fluffy"
+          },
+          "tag": {
+            "type": "string",
+            "example": "dog"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["available", "pending", "sold", "adopted"]
+          }
+        }
+      },
+      "PetList": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/Pet"}
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "required": ["id", "email"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["admin", "user", "viewer"]
+          }
+        }
+      },
+      "UserInput": {
+        "type": "object",
+        "required": ["email", "name"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["admin", "user", "viewer"],
+            "default": "user"
+          }
+        }
+      }
+    }
+  }
+}
